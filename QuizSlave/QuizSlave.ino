@@ -30,8 +30,8 @@ const int pinButton = 4;
 const int PAYLOAD_SIZE = 32;
 
 // Transmission Canals
-const byte CANAL_MASTER_TO_SLAVE[4] = "CM2S";
-const byte CANAL_SLAVE_TO_MASTER[4] = "CS2M";
+const byte CANAL_MASTER_TO_SLAVE[5] = "RFM2S";
+const byte CANAL_SLAVE_TO_MASTER[5] = "RFS2M";
 
 // Quiz modes
 const int MODE_REGISTER = 1;    // Buzzer waits for the master to recognize it
@@ -112,7 +112,7 @@ void initTransmission()
   
   // Begin Radio Transmission
   radio.begin();
-  radio.setPayloadSize(PAYLOAD_SIZE); // We don't need to transmit a lot of data
+//  radio.setPayloadSize(PAYLOAD_SIZE); // We don't need to transmit a lot of data
   radio.setDataRate( RF24_250KBPS );
   radio.setRetries(3,5); // delay, count
   
@@ -121,12 +121,16 @@ void initTransmission()
   //   -  It writes on the Master -> Slave channel
   //   -  It listens on the Slave -> Master channel
   radio.openWritingPipe(CANAL_SLAVE_TO_MASTER);
-  //radio.openReadingPipe(1,CANAL_SLAVE_TO_MASTER);*/
+  radio.openReadingPipe(1,CANAL_MASTER_TO_SLAVE);
+
+  radio.startListening(); 
 }
 
 //====================
 
 void send() {
+
+    radio.stopListening(); 
 
     bool rslt;
     rslt = radio.write( &sendMessage, sizeof(sendMessage) );
@@ -145,6 +149,8 @@ void send() {
     else {
         Serial.println("  Tx failed");
     }
+
+    radio.startListening(); 
 }
 
 //================
