@@ -86,18 +86,14 @@ unsigned long txIntervalMillis = 1000; // send once per second
 void setup() {
 
     Serial.begin(9600);
-
+    initTransmission();
+    
 // init Msg
   sendMessage.sender = buzzerId;
   sendMessage.target = 0;
   sendMessage.info = MSG_ANSWERED;
   
     Serial.println("SimpleTx Starting");
-
-    radio.begin();
-    radio.setDataRate( RF24_250KBPS );
-    radio.setRetries(3,5); // delay, count
-    radio.openWritingPipe(CANAL_SLAVE_TO_MASTER);
 }
 
 //====================
@@ -108,6 +104,24 @@ void loop() {
         send();
         prevMillis = millis();
     }
+}
+
+void initTransmission()
+{
+  Serial.println("SimpleTx Starting");
+  
+  // Begin Radio Transmission
+  radio.begin();
+  radio.setPayloadSize(PAYLOAD_SIZE); // We don't need to transmit a lot of data
+  radio.setDataRate( RF24_250KBPS );
+  radio.setRetries(3,5); // delay, count
+  
+  // Open Emitting / Receiving transmission canals
+  // This is the Master code, so :
+  //   -  It writes on the Master -> Slave channel
+  //   -  It listens on the Slave -> Master channel
+  radio.openWritingPipe(CANAL_SLAVE_TO_MASTER);
+  //radio.openReadingPipe(1,CANAL_SLAVE_TO_MASTER);*/
 }
 
 //====================

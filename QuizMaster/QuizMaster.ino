@@ -94,6 +94,7 @@ void initTransmission()
   radio.begin();
   radio.setPayloadSize(PAYLOAD_SIZE); // We don't need to transmit a lot of data
   radio.setDataRate(RF24_250KBPS);
+  radio.setRetries(3,5); // delay, count
 
   // Open Emitting / Receiving transmission canals
   // This is the Master code, so :
