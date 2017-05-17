@@ -69,8 +69,6 @@ int buttonState = HIGH;  // Last button state (default open)
 
 
 
-
-char dataReceived[10]; // this must match dataToSend in the TX
 bool newData = false;
 
 //===========
@@ -78,12 +76,7 @@ bool newData = false;
 void setup() {
 
     Serial.begin(9600);
-
-    Serial.println("SimpleRx Starting");
-    radio.begin();
-    radio.setDataRate( RF24_250KBPS );
-    radio.openReadingPipe(1, CANAL_SLAVE_TO_MASTER);
-    radio.startListening();
+    initTransmission();
 }
 
 //=============
@@ -93,6 +86,24 @@ void loop() {
     showData();
 }
 
+void initTransmission()
+{
+  Serial.println("SimpleRx Starting");
+  
+  // Begin Radio Transmission
+  radio.begin();
+  radio.setPayloadSize(PAYLOAD_SIZE); // We don't need to transmit a lot of data
+  radio.setDataRate(RF24_250KBPS);
+
+  // Open Emitting / Receiving transmission canals
+  // This is the Master code, so :
+  //   -  It writes on the Master -> Slave channel
+  //   -  It listens on the Slave -> Master channel
+//  radio.openWritingPipe(CANAL_MASTER_TO_SLAVE);
+  radio.openReadingPipe(1,CANAL_SLAVE_TO_MASTER);
+
+  radio.startListening(); 
+}
 //==============
 
 void getData() {
