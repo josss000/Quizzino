@@ -10,7 +10,7 @@ typedef struct {
   int gameMode;
   int sender; // Who sends the message ? 0 = Master
   int target; // Who is the message for ? 0 = Master
-  int message;
+  int info;
 } message;
 
 /**** Constants ****/
@@ -58,6 +58,7 @@ RF24 radio(pinCE,pinCSN); // Set up nRF24L01 radio on SPI bus pins
 int buzzerCount;
 int answersList[MAX_NB_ANSWERS];
 int answersNb;
+message receivedMessage;
 
 //TEMP
 int timeLight;
@@ -96,15 +97,21 @@ void loop() {
 
 void getData() {
     if ( radio.available() ) {
-        radio.read( &dataReceived, sizeof(dataReceived) );
+        radio.read( &receivedMessage, sizeof(receivedMessage) );
         newData = true;
     }
 }
 
 void showData() {
     if (newData == true) {
-        Serial.print("Data received ");
-        Serial.println(dataReceived);
+        Serial.print("Message From : ");
+        Serial.println(receivedMessage.sender);
+        Serial.print("Info : ");
+        Serial.println(receivedMessage.info);
+        Serial.print("Target : ");
+        Serial.println(receivedMessage.target);
+        Serial.print("GameMode : ");
+        Serial.println(receivedMessage.gameMode);
         newData = false;
     }
 }

@@ -11,7 +11,7 @@ typedef struct {
   int gameMode;
   int sender; // Who sends the message ? 0 = Master
   int target; // Who is the message for ? 0 = Master
-  int message;
+  int info;
 } message;
 
 /**** Constants ****/
@@ -58,9 +58,16 @@ RF24 radio(pinCE,pinCSN); // Set up nRF24L01 radio on SPI bus pins
 
 int buzzerMode;  // Stores the game status
 int buttonState = HIGH;  // Last button state (default open)
+message sendMessage;
 
 //TEMP
 int timeLight;
+
+
+
+
+
+
 
 
 
@@ -75,10 +82,16 @@ unsigned long prevMillis;
 unsigned long txIntervalMillis = 1000; // send once per second
 
 
+
 void setup() {
 
     Serial.begin(9600);
 
+// init Msg
+  sendMessage.sender = buzzerId;
+  sendMessage.target = 0;
+  sendMessage.info = MSG_ANSWERED;
+  
     Serial.println("SimpleTx Starting");
 
     radio.begin();
@@ -102,12 +115,15 @@ void loop() {
 void send() {
 
     bool rslt;
-    rslt = radio.write( &dataToSend, sizeof(dataToSend) );
+    rslt = radio.write( &sendMessage, sizeof(sendMessage) );
+//    rslt = radio.write( &dataToSend, sizeof(dataToSend) );
         // Always use sizeof() as it gives the size as the number of bytes.
         // For example if dataToSend was an int sizeof() would correctly return 2
 
     Serial.print("Data Sent ");
-    Serial.print(dataToSend);
+    Serial.print(sendMessage.sender);
+//    Serial.print(dataToSend);
+
     if (rslt) {
         Serial.println("  Acknowledge received");
         updateMessage();
@@ -126,5 +142,6 @@ void updateMessage() {
         txNum = '0';
     }
     dataToSend[8] = txNum;
+    sendMessage.sender = txNum - '0';
 }
 
