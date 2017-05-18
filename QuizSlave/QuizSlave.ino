@@ -11,7 +11,7 @@
 // Wiring
 const int pinLED = 2;
 const int pinButton = 4;
-
+const int pinBuzzId = 6;
 /**** Variables ****/
 
 int buzzerMode;  // Stores the game status
@@ -19,6 +19,7 @@ int buttonState = HIGH;  // Last button state (default open)
 
 //TEMP
 int timeLight;
+const int pinID = 6;
 
 void setup() {
 
@@ -30,9 +31,15 @@ void setup() {
   initLedAndButton();
 
   //TEMP
+  pinMode(pinButton, INPUT);
   timeLight = millis();
   buzzerMode = MODE_PLAYING;
+  pinMode(pinBuzzId, INPUT);
 
+  if (digitalRead(pinBuzzId) == HIGH)  myself = 1;
+  else myself = 2;
+  Serial.print("BuzzerId : ");
+  Serial.println(myself);
 }
 
 //====================
