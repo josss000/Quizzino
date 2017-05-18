@@ -153,46 +153,28 @@ void sendAnswer()
 {
   radio.stopListening();
 
-  message sendMessage;
-  sendMessage.sender = buzzerId;
-  sendMessage.target = TARGET_MASTER;
-  sendMessage.info = MSG_ANSWERED;
-  bool ok = radio.write( &sendMessage, sizeof(sendMessage) );
+  message messageToSend;
+  messageToSend.sender = buzzerId;
+  messageToSend.target = TARGET_MASTER;
+  messageToSend.info = MSG_ANSWERED;
+  bool ok = radio.write( &messageToSend, sizeof(messageToSend) );
 
-  if (ok) {
-    Serial.print("Sending buzzerID");
-    Serial.print(buzzerId);
-    Serial.println("success");
-    }
-    else
-    {
-      Serial.println("Sending : failed");
-      }
   radio.startListening();
-}
 
-void send() {
+  Serial.print("Message From : ");
+  Serial.println(messageToSend.sender);
+  Serial.print("Info : ");
+  Serial.println(messageToSend.info);
+  Serial.print("Target : ");
+  Serial.println(messageToSend.target);
+  Serial.print("GameMode : ");
+  Serial.println(messageToSend.gameMode);
+  Serial.println("---");
+  Serial.print("Résultat : ");
+  if(ok) Serial.println("Envoyé");
+  else Serial.println("Raté");
+  Serial.println("---");
 
-    radio.stopListening(); 
-
-    bool rslt;
-    rslt = radio.write( &sendMessage, sizeof(sendMessage) );
-//    rslt = radio.write( &dataToSend, sizeof(dataToSend) );
-        // Always use sizeof() as it gives the size as the number of bytes.
-        // For example if dataToSend was an int sizeof() would correctly return 2
-
-    Serial.print("Data Sent ");
-    Serial.print(sendMessage.sender);
-//    Serial.print(dataToSend);
-
-    if (rslt) {
-        Serial.println("  Acknowledge received");
-    }
-    else {
-        Serial.println("  Tx failed");
-    }
-
-    radio.startListening(); 
 }
 
 //================

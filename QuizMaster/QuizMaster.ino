@@ -75,15 +75,28 @@ bool newData = false;
 
 void setup() {
 
-    Serial.begin(9600);
-    initTransmission();
+  // Open Serial Interface for debugging
+  Serial.begin(9600);
+
+  initTransmission();
+
+  //  const int currentMode = MODE_REGISTER; // On startup, the master waits for the buzzer to register
+  
+  //TEMP
+  buzzerCount = 2;
+  timeLight = millis();
+//  enterGameMode();
+  buttonState = HIGH;
+  
 }
 
 //=============
 
 void loop() {
-    getData();
-    showData();
+  // check if buzzer sends a message
+  if (radio.available()) readMessage();
+
+//  checkForUserInput();
 }
 
 void initTransmission()
@@ -105,7 +118,90 @@ void initTransmission()
 
   radio.startListening(); 
 }
-//==============
+
+
+void turnLightOn(int pin)
+{
+  digitalWrite(pin, LOW);
+}
+
+void turnLightOff(int pin)
+{
+  digitalWrite(pin, HIGH);
+}
+
+void readMessage()
+{
+  message receivedMessage;
+        Serial.println("Message reçu");
+
+  while (radio.available())
+  {
+      radio.read( &receivedMessage, sizeof(receivedMessage));
+  }
+  
+  if (receivedMessage.target != TARGET_MASTER) 
+  {
+    Serial.println("C'est pas pour moi, j'me casse");
+    return;
+  } // Message is not for me
+  else Serial.println("C'est pour moi");
+
+  switch (receivedMessage.info)
+  {
+    case MSG_REGISTER:
+      // TODO feedback register and set Id
+      break;
+      
+    case MSG_ANSWERED:
+      Serial.println("QQn a répondu");
+      if (answersNb < MAX_NB_ANSWERS) storeAnswer(receivedMessage.sender);
+      break;
+  }
+}
+
+bool sendMessage(int gameMode, int target, int msg)
+{
+  Serial.println("---");
+  Serial.println("Envoi du message");
+  radio.stopListening();
+
+  message messageToSend;
+  messageToSend.sender = TARGET_MASTER;
+  messageToSend.target = target;
+  messageToSend.info = msg;
+  bool ok = radio.write( &messageToSend, sizeof(messageToSend) );
+  
+  radio.startListening();
+
+  Serial.print("Message From : ");
+  Serial.println(messageToSend.sender);
+  Serial.print("Info : ");
+  Serial.println(messageToSend.info);
+  Serial.print("Target : ");
+  Serial.println(messageToSend.target);
+  Serial.print("GameMode : ");
+  Serial.println(messageToSend.gameMode);
+  Serial.println("---");
+  Serial.print("Résultat : ");
+  if(ok) Serial.println("Envoyé");
+  else Serial.println("Raté");
+  Serial.println("---");
+
+}
+
+
+void storeAnswer(int buzzerId)
+{
+  answersNb++;
+  answersList[answersNb] = buzzerId;
+      
+  // only gives feedback for the first answer
+  if(answersNb == 1) sendMessage(MODE_PLAYING, buzzerId, MSG_FIRST_ANSWER);
+}
+
+
+//============== DELETE
 
 void getData() {
     if ( radio.available() ) {
