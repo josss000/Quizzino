@@ -107,7 +107,7 @@ void loop() {
   currentButtonState = digitalRead(pinButton);
 
   // check if master sends a message
-//  if (radio.available()) readMessage;
+  if (radio.available()) readMessage;
 
   if (currentButtonState != buttonState && currentButtonState == LOW)
   {
@@ -128,7 +128,7 @@ void loop() {
 
 void initTransmission()
 {
-  Serial.println("SimpleTx Starting");
+  Serial.println("Quizino Slave Starting");
   
   // Begin Radio Transmission
   radio.begin();
@@ -194,5 +194,51 @@ void turnLightOn()
 void turnLightOff()
 {
   digitalWrite(pinLED, HIGH);  
+}
+
+void readMessage()
+{
+  message receivedMessage;
+          Serial.println("Message reçu");
+
+  while (radio.available())
+  {
+      radio.read( &receivedMessage, sizeof(receivedMessage));
+  }
+  
+  if (receivedMessage.target != TARGET_MASTER) 
+  {
+    Serial.println("C'est pas pour moi, j'me casse");
+    return;
+  } // Message is not for me
+  else Serial.println("C'est pour moi");
+    
+  switch (receivedMessage.gameMode)
+  {
+    case MSG_NEW_ID:
+    // buzzerReceives its Id
+      buzzerId = receivedMessage.info;
+      break;
+      
+    case MSG_BUZZER_SIGNED_IN:
+      // Nothing much to do -> if not received, register & timeout ? //TODO
+      break;
+      
+    case MSG_GAME_ON:
+      // Sets Playing mode : if the user pushes the buzzer, a message is sent to the master
+      turnLightOff();
+      buzzerMode = MODE_PLAYING;
+      break;
+      
+    case MSG_FIRST_ANSWER:
+      // The buzzer has been pushed first. Lights are on
+      turnLightOn();
+      break;
+      
+    case MSG_WRONG_ANSWER:
+      // Answer is wrong, buzzer is Locked
+      buzzerMode = MODE_LOCKED;
+      break;
+  }
 }
 

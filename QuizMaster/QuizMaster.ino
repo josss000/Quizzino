@@ -101,7 +101,7 @@ void loop() {
 
 void initTransmission()
 {
-  Serial.println("SimpleRx Starting");
+  Serial.println("Quizino Master Starting");
   
   // Begin Radio Transmission
   radio.begin();
@@ -201,25 +201,4 @@ void storeAnswer(int buzzerId)
 }
 
 
-//============== DELETE
 
-void getData() {
-    if ( radio.available() ) {
-        radio.read( &receivedMessage, sizeof(receivedMessage) );
-        newData = true;
-    }
-}
-
-void showData() {
-    if (newData == true) {
-        Serial.print("Message From : ");
-        Serial.println(receivedMessage.sender);
-        Serial.print("Info : ");
-        Serial.println(receivedMessage.info);
-        Serial.print("Target : ");
-        Serial.println(receivedMessage.target);
-        Serial.print("GameMode : ");
-        Serial.println(receivedMessage.gameMode);
-        newData = false;
-    }
-}
