@@ -85,15 +85,15 @@ unsigned long txIntervalMillis = 1000; // send once per second
 
 void setup() {
 
-    Serial.begin(9600);
-    initTransmission();
+  Serial.begin(9600);
     
-// init Msg
-  sendMessage.sender = buzzerId;
-  sendMessage.target = 0;
-  sendMessage.info = MSG_ANSWERED;
-  
-    Serial.println("SimpleTx Starting");
+  initTransmission();
+  initLedAndButton();
+
+  //TEMP
+  timeLight = millis();
+  buzzerMode = MODE_PLAYING;
+
 }
 
 //====================
@@ -101,7 +101,7 @@ void setup() {
 void loop() {
     currentMillis = millis();
     if (currentMillis - prevMillis >= txIntervalMillis) {
-        send();
+        sendAnswer();
         prevMillis = millis();
     }
 }
@@ -128,6 +128,29 @@ void initTransmission()
 
 //====================
 
+
+void sendAnswer()
+{
+  radio.stopListening();
+
+  message sendMessage;
+  sendMessage.sender = buzzerId;
+  sendMessage.target = TARGET_MASTER;
+  sendMessage.info = MSG_ANSWERED;
+  bool ok = radio.write( &sendMessage, sizeof(sendMessage) );
+
+  if (ok) {
+    Serial.print("Sending buzzerID");
+    Serial.print(buzzerId);
+    Serial.println("success");
+    }
+    else
+    {
+      Serial.println("Sending : failed");
+      }
+  radio.startListening();
+}
+
 void send() {
 
     radio.stopListening(); 
@@ -144,7 +167,6 @@ void send() {
 
     if (rslt) {
         Serial.println("  Acknowledge received");
-        updateMessage();
     }
     else {
         Serial.println("  Tx failed");
@@ -155,13 +177,20 @@ void send() {
 
 //================
 
-void updateMessage() {
-        // so you can see that new data is being sent
-    txNum += 1;
-    if (txNum > '9') {
-        txNum = '0';
-    }
-    dataToSend[8] = txNum;
-    sendMessage.sender = txNum - '0';
+void initLedAndButton()
+{
+    pinMode(pinLED, OUTPUT);
+    pinMode(pinButton, INPUT);
+    turnLightOff();
+}
+
+void turnLightOn()
+{
+  digitalWrite(pinLED, LOW);
+}
+
+void turnLightOff()
+{
+  digitalWrite(pinLED, HIGH);  
 }
 
