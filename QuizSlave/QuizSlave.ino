@@ -39,14 +39,15 @@ void setup() {
 
 void loop() {
 
+  // check if master sends a message
+  if (radio.available()) 
+  {
+    readMessage();
+  }
   int currentButtonState;
-  message receivedMessage;
     
   // check button state : pushed or not ?
   currentButtonState = digitalRead(pinButton);
-
-  // check if master sends a message
-  if (radio.available()) readMessage;
 
   if (currentButtonState != buttonState && currentButtonState == LOW)
   {
@@ -72,48 +73,42 @@ void initLedAndButton()
     turnLightOff(pinLED);
 }
 
-void readMessage()
+void processMessage(message receivedMessage)
 {
-  message receivedMessage;
-          Serial.println("Message reçu");
-
-  while (radio.available())
-  {
-      radio.read( &receivedMessage, sizeof(receivedMessage));
-  }
-  
-  if (receivedMessage.target != TARGET_MASTER) 
-  {
-    Serial.println("C'est pas pour moi, j'me casse");
-    return;
-  } // Message is not for me
-  else Serial.println("C'est pour moi");
-    
   switch (receivedMessage.info)
   {
     case MSG_NEW_ID:
-    // buzzerReceives its Id
+      Serial.println("New ID");
+      // buzzerReceives its Id
       myself = receivedMessage.info;
       break;
       
     case MSG_BUZZER_SIGNED_IN:
+      Serial.println("Signed in");
       // Nothing much to do -> if not received, register & timeout ? //TODO
       break;
       
     case MSG_GAME_ON:
+      Serial.println("Gameon");
       // Sets Playing mode : if the user pushes the buzzer, a message is sent to the master
       turnLightOff(pinLED);
       buzzerMode = MODE_PLAYING;
       break;
       
     case MSG_FIRST_ANSWER:
+      Serial.println("First");
       // The buzzer has been pushed first. Lights are on
       turnLightOn(pinLED);
       break;
       
     case MSG_WRONG_ANSWER:
+      Serial.println("Wrong");
       // Answer is wrong, buzzer is Locked
       buzzerMode = MODE_LOCKED;
+      break;
+    default:
+      
+      Serial.println("Oups");
       break;
   }
 }

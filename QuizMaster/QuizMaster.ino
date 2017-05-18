@@ -53,28 +53,16 @@ void setup() {
 
 void loop() {
   // check if buzzer sends a message
-  if (radio.available()) readMessage();
+  if (radio.available()) 
+  {
+    readMessage();
+  }
 
 //  checkForUserInput();
 }
 
-void readMessage()
+void processMessage(message receivedMessage)
 {
-  message receivedMessage;
-        Serial.println("Message reçu");
-
-  while (radio.available())
-  {
-      radio.read( &receivedMessage, sizeof(receivedMessage));
-  }
-  
-  if (receivedMessage.target != TARGET_MASTER) 
-  {
-    Serial.println("C'est pas pour moi, j'me casse");
-    return;
-  } // Message is not for me
-  else Serial.println("C'est pour moi");
-
   switch (receivedMessage.info)
   {
     case MSG_REGISTER:
@@ -83,16 +71,19 @@ void readMessage()
       
     case MSG_ANSWERED:
       Serial.println("QQn a répondu");
-      if (answersNb < MAX_NB_ANSWERS) storeAnswer(receivedMessage.sender);
+      sendMessage(receivedMessage.sender, MSG_FIRST_ANSWER);
+      //if (answersNb < MAX_NB_ANSWERS) storeAnswer(receivedMessage.sender);
       break;
-  }
+  } 
 }
+
 
 void storeAnswer(int buzzerId)
 {
   answersNb++;
   answersList[answersNb] = buzzerId;
-      
+  //TODO : check if answer not already logged
+  
   // only gives feedback for the first answer
   if(answersNb == 1) sendMessage(buzzerId, MSG_FIRST_ANSWER);
 }
