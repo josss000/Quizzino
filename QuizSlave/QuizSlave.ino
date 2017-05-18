@@ -99,11 +99,31 @@ void setup() {
 //====================
 
 void loop() {
-    currentMillis = millis();
-    if (currentMillis - prevMillis >= txIntervalMillis) {
-        sendAnswer();
-        prevMillis = millis();
-    }
+
+  int currentButtonState;
+  message receivedMessage;
+    
+  // check button state : pushed or not ?
+  currentButtonState = digitalRead(pinButton);
+
+  // check if master sends a message
+//  if (radio.available()) readMessage;
+
+  if (currentButtonState != buttonState && currentButtonState == LOW)
+  {
+    // Button has been pushed
+    Serial.print("Réponse :");
+    Serial.println(buzzerId);
+    Serial.println("");
+    sendAnswer();
+
+    timeLight = millis();   
+  }
+  
+  buttonState = currentButtonState;
+
+  // TEMP
+  if (millis() - timeLight > 200)  turnLightOff();
 }
 
 void initTransmission()
