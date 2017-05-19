@@ -35,6 +35,7 @@ void setup() {
   timeLight = millis();
   buzzerMode = MODE_PLAYING;
   pinMode(pinBuzzId, INPUT);
+  pinMode(pinLED, OUTPUT);
 
   if (digitalRead(pinBuzzId) == HIGH)  myself = 1;
   else myself = 2;

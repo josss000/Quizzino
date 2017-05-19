@@ -42,6 +42,8 @@ void setup() {
   //  const int currentMode = MODE_REGISTER; // On startup, the master waits for the buzzer to register
   
   //TEMP
+  pinMode(pinLEDBlue, OUTPUT);
+  pinMode(pinLEDGreen, OUTPUT);
   buzzerCount = 2;
   timeLight = millis();
 //  enterGameMode();
@@ -58,6 +60,10 @@ void loop() {
     readMessage();
   }
 
+  if ((timeLight - millis()) > 2000) {
+    turnLightOff(pinLEDGreen);
+    turnLightOff(pinLEDBlue);
+    }
 //  checkForUserInput();
 }
 
@@ -72,6 +78,10 @@ void processMessage(message receivedMessage)
     case MSG_ANSWERED:
       Serial.println("QQn a répondu");
       sendMessage(receivedMessage.sender, MSG_FIRST_ANSWER);
+      if (receivedMessage.sender == 1) turnLightOn(pinLEDBlue);
+      else turnLightOff(pinLEDGreen);
+      timeLight = millis();
+
       //if (answersNb < MAX_NB_ANSWERS) storeAnswer(receivedMessage.sender);
       break;
   } 
